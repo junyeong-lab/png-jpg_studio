@@ -1,0 +1,249 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>짤·카드 스튜디오</title><style>
+*{box-sizing:border-box}:root{--bg:#f5efe5;--panel:#fffaf2;--ink:#24211d;--muted:#756d63;--line:#d8cdbd;--accent:#e45f3a;--bad:#b42318;--good:#18794e}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI","Noto Sans KR",sans-serif;background:
+radial-gradient(circle at 15% 10%,#fff8e9 0 2px,transparent 3px) 0 0/34px 34px,
+linear-gradient(135deg,#f7f0e5,#efe3d3);color:var(--ink)}header{height:72px;background:#26221e;color:#fff8ed;display:flex;align-items:center;justify-content:space-between;padding:0 30px;border-bottom:5px solid #e45f3a}header b{font-size:20px}header span{font-size:12px;color:#b8bfd4}.app{display:grid;grid-template-columns:340px minmax(330px,1fr) minmax(330px,1fr);gap:16px;padding:16px;max-width:1600px;margin:auto}.panel,.previewPanel{background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:7px 7px 0 #2f2a2414}.panel{padding:20px}.section{padding:16px 0;border-bottom:1px solid var(--line)}.section:last-child{border:0}h2{font-size:15px;margin:0 0 12px}.label{font-size:12px;font-weight:800;margin:10px 0 6px;display:block}textarea,select{width:100%;border:1px solid #cfd5e2;border-radius:10px;padding:10px;background:#fff;font:inherit}textarea{min-height:88px;resize:vertical}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}input[type=range]{width:100%}.rangeRow{display:grid;grid-template-columns:1fr 54px;gap:8px;align-items:center}.value{font-size:12px;text-align:right;color:var(--muted)}.fileBox{border:2px dashed #c7a987;border-radius:12px;padding:14px;text-align:center;background:#fff6e8}.fileBox input{max-width:100%}.msg{min-height:20px;margin-top:8px;font-size:12px}.msg.bad{color:var(--bad)}.msg.good{color:var(--good)}.ratios{display:flex;gap:8px}.ratios button{border:1px solid #ccd2df;background:white;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer}.ratios button.on{background:var(--accent);color:#fff;border-color:var(--accent)}.previewPanel{min-height:720px;padding:20px;display:flex;flex-direction:column}.previewHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.previewHead b{font-size:15px}.stage{flex:1;min-height:620px;border-radius:14px;background:#edf0f6;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:20px}canvas{display:block;max-width:100%;max-height:620px;box-shadow:0 12px 32px #12162933;background:white}.hint{font-size:11px;color:var(--muted);line-height:1.5}.statusPill{padding:6px 9px;border-radius:999px;background:#ffe4d8;color:#9c3e25;font-size:11px;font-weight:800}@media(max-width:1100px){.app{grid-template-columns:1fr}.previewPanel{min-height:600px}.stage{min-height:500px}canvas{max-height:500px}}
+
+.templateBox{margin-top:18px;padding-top:14px;border-top:1px solid #ddd0bf}
+.templateRow{display:flex;gap:7px;margin:7px 0}
+.templateRow input,.templateRow select{min-width:0;flex:1;padding:9px;border:1px solid #cfd5e2;border-radius:9px;background:#fff}
+.templateRow button{padding:9px 10px;border:1px solid #cfd5e2;border-radius:9px;background:#fff;cursor:pointer;font-weight:700}
+.templateRow .primary{background:#e45f3a;color:#fff;border-color:#e45f3a}.templateRow .danger{color:#b42318}
+</style></head><body><header><b>짤·카드 스튜디오</b><span>이미지 + 한글 문구 실시간 편집</span></header><main class="app"><section class="panel">
+<div class="section"><h2>1. 이미지 편집</h2><div class="fileBox"><input id="file" type="file" accept=".png,.jpg,.jpeg,image/png,image/jpeg"><div class="hint">PNG · JPEG만 지원합니다. 잘못된 파일은 현재 작업을 변경하지 않습니다.</div></div><div id="fileMsg" class="msg" aria-live="polite"></div></div>
+</div></div>
+<div class="section"><h2>2. 문구 편집</h2><label class="label" for="text">문구</label><textarea id="text">오늘도 해냈다 🙌</textarea><div class="row"><div><label class="label" for="x">가로 위치</label><div class="rangeRow"><input id="x" type="range" min="0" max="100" value="50"><span id="xv" class="value">50%</span></div></div><div><label class="label" for="y">세로 위치</label><div class="rangeRow"><input id="y" type="range" min="0" max="100" value="82"><span id="yv" class="value">82%</span></div></div></div><label class="label" for="size">문구 크기</label><div class="rangeRow"><input id="size" type="range" min="18" max="120" value="54"><span id="sv" class="value">54px</span></div><div class="row"><div><label class="label" for="color">문구 색</label><input id="color" type="color" value="#ffffff" style="width:100%;height:42px;border:1px solid #cfd5e2;border-radius:10px"></div><div><label class="label" for="align">정렬</label><select id="align"><option value="center">가운데</option><option value="left">왼쪽</option><option value="right">오른쪽</option></select></div></div></div>
+<div class="section"><h2>3. 화면비</h2><div class="ratios"><button class="on" data-ratio="1:1">1:1</button><button data-ratio="4:5">4:5</button><button data-ratio="9:16">9:16</button></div><div class="hint" style="margin-top:9px">미리보기와 저장 파일은 같은 Canvas 렌더링을 사용합니다.</div></div><div class="section"><h2>4. 저장 결과 비교</h2><button class="action" id="compareBtn" type="button" style="width:100%;margin-bottom:10px;background:#e45f3a;color:white;border-color:#e45f3a">저장 결과 확인</button><div class="hint" style="margin-bottom:12px">실제 저장에 사용하는 동일한 Canvas 결과를 오른쪽에 고정해 비교합니다.</div><h2>5. 완성 이미지 내려받기</h2><div class="row"><button class="action" id="downloadPng" type="button">PNG 저장</button><button class="action" id="downloadJpg" type="button">JPEG 저장</button></div><div id="saveMsg" class="msg" aria-live="polite"></div><div class="hint">현재 미리보기와 동일한 Canvas를 파일로 저장합니다.</div></div>
+<div class="section templateBox"><h2>6. 템플릿 관리</h2>
+<div class="templateRow"><input id="templateName" maxlength="40" placeholder="템플릿 이름"><button id="templateCreate" class="primary" type="button">새로 저장</button></div>
+<div class="templateRow"><select id="templateList"><option value="">저장된 템플릿 없음</option></select><button id="templateLoad" type="button">불러오기</button></div>
+<div class="templateRow"><button id="templateUpdate" type="button">현재 설정으로 수정</button><button id="templateDelete" class="danger" type="button">삭제</button></div>
+<div class="templateRow"><button id="jsonExport" type="button">JSON 내보내기</button><button id="jsonImportBtn" type="button">JSON 가져오기</button></div>
+<input id="jsonImportFile" type="file" accept=".json,application/json" style="display:none">
+<div id="templateMsg" class="msg" aria-live="polite"></div>
+<div class="hint">사진과 편집 설정을 IndexedDB에 함께 저장합니다. 큰 사진도 저장할 수 있고 새로고침 후 다시 불러올 수 있습니다.</div></div></section>
+<section class="previewPanel">
+<div class="previewHead">
+  <b>실시간 미리보기</b>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span class="statusPill" id="ratioLabel">1:1 · 1080×1080</span>
+    <button class="action" id="compareBtnTop" type="button" style="background:#e45f3a;color:#fff;border-color:#e45f3a">저장 결과 확인</button>
+  </div>
+</div>
+<div class="stage"><canvas id="canvas" width="1080" height="1080"></canvas></div>
+</section>
+<section class="previewPanel">
+<div class="previewHead"><b>저장 결과 미리보기</b><span class="statusPill" id="savedRatioLabel">아직 생성 전</span></div>
+<div class="stage" id="savedStage"><div id="savedEmpty" class="hint" style="text-align:center">왼쪽에서 편집한 뒤<br><b>저장 결과 확인</b>을 눌러주세요.</div><canvas id="savedCanvas" width="1080" height="1080" style="display:none"></canvas></div>
+</section></main>
+<script>(()=>{const $=id=>document.getElementById(id),canvas=$('canvas'),ctx=canvas.getContext('2d'),savedCanvas=$('savedCanvas'),savedCtx=savedCanvas.getContext('2d'),file=$('file'),fileMsg=$('fileMsg'),text=$('text'),x=$('x'),y=$('y'),size=$('size'),color=$('color'),align=$('align'),saveMsg=$('saveMsg'),downloadPng=$('downloadPng'),downloadJpg=$('downloadJpg');const dims={'1:1':[1080,1080],'4:5':[1080,1350],'9:16':[1080,1920]};let ratio='1:1',image=null,imageDataUrl=null;function coverRect(iw,ih,cw,ch){const s=Math.max(cw/iw,ch/ih),w=iw*s,h=ih*s;return[(cw-w)/2,(ch-h)/2,w,h]}function wrapLines(str,maxWidth){const ps=String(str).split('\n'),lines=[];for(const p of ps){if(p===''){lines.push('');continue}let line='';for(const ch of Array.from(p)){const test=line+ch;if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=ch}else line=test}lines.push(line)}return lines}function draw(){const [w,h]=dims[ratio];if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}ctx.clearRect(0,0,w,h);if(image){
+ctx.save();
+ctx.beginPath();ctx.rect(0,0,w,h);ctx.clip();
+ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+ctx.drawImage(image,0,0,w,h);
+ctx.restore();
+}else{const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#303b73');g.addColorStop(1,'#101528');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle='#ffffff55';ctx.font='700 34px system-ui';ctx.textAlign='center';ctx.fillText('PNG 또는 JPEG 이미지를 불러오세요',w/2,h/2)}let fs=+size.value;const max=w*.88,availableH=h*.88;function layoutText(fontSize){ctx.font=`900 ${fontSize}px "Noto Sans KR",system-ui,sans-serif`;const ls=wrapLines(text.value,max),lineH=fontSize*1.22;return{lines:ls,lh:lineH,height:ls.length*lineH}}let layout=layoutText(fs);while(fs>18&&layout.height>availableH){fs=Math.max(18,fs-2);layout=layoutText(fs)}ctx.font=`900 ${fs}px "Noto Sans KR",system-ui,sans-serif`;ctx.fillStyle=color.value;ctx.textAlign=align.value;ctx.textBaseline='middle';ctx.lineJoin='round';ctx.lineWidth=Math.max(3,fs*.10);ctx.strokeStyle='rgba(0,0,0,.72)';const xp=+x.value/100,yp=+y.value/100;let maxLineW=0;layout.lines.forEach(ln=>{maxLineW=Math.max(maxLineW,ctx.measureText(ln).width)});const strokePad=Math.max(2,fs*.08);
+const usableW=Math.max(0,w-maxLineW-2*strokePad);
+const usableH=Math.max(0,h-layout.height-2*strokePad);
+
+// 가로/세로 위치 슬라이더가 항상 실제 문구 위치를 움직이도록 계산
+const leftEdge=strokePad+usableW*xp;
+const topEdge=strokePad+usableH*yp;
+
+// 정렬은 사용자가 기대하는 화면 위치 의미로 사용.
+// 왼쪽/가운데/오른쪽 선택 시 x 슬라이더가 각각 0/50/100으로 이동하며,
+// 여기서는 현재 x 위치에 맞춰 글자 블록의 안전한 기준점을 계산한다.
+let tx;
+if(align.value==='left') tx=leftEdge;
+else if(align.value==='right') tx=leftEdge+maxLineW;
+else tx=leftEdge+maxLineW/2;
+
+let ty=topEdge+layout.lh/2;
+layout.lines.forEach((ln,i)=>{const yy=ty+i*layout.lh;ctx.strokeText(ln,tx,yy,max);ctx.fillText(ln,tx,yy,max)});$('xv').textContent=x.value+'%';$('yv').textContent=y.value+'%';$('sv').textContent=size.value+'px';$('ratioLabel').textContent=`${ratio} · ${w}×${h}`}function reject(reason){fileMsg.className='msg bad';fileMsg.textContent=reason;file.value=''}file.addEventListener('change',()=>{const f=file.files&&file.files[0];if(!f)return;const okType=f.type==='image/png'||f.type==='image/jpeg',okExt=/\.(png|jpe?g)$/i.test(f.name);if(!okType||!okExt){reject('지원하지 않는 파일입니다. PNG 또는 JPEG 이미지만 사용할 수 있습니다. 기존 작업은 유지됩니다.');return}const reader=new FileReader();reader.onerror=()=>reject('파일을 읽을 수 없습니다. 기존 작업은 유지됩니다.');reader.onload=()=>{const candidate=new Image();candidate.onerror=()=>reject('이미지 파일이 손상되었거나 읽을 수 없습니다. 기존 작업은 유지됩니다.');candidate.onload=()=>{image=candidate;imageDataUrl=reader.result;fileMsg.className='msg good';fileMsg.textContent=`불러오기 완료: ${f.name} · ${candidate.naturalWidth}×${candidate.naturalHeight}`;draw()};candidate.src=reader.result};reader.readAsDataURL(f)});[text,x,y,size,color,align].forEach(el=>el.addEventListener('input',draw));align.addEventListener('change',()=>{
+  if(align.value==='left') x.value=0;
+  else if(align.value==='center') x.value=50;
+  else if(align.value==='right') x.value=100;
+  draw();
+});
+[x,y].forEach(el=>{
+  el.addEventListener('input',draw);
+  el.addEventListener('change',draw);
+});
+document.querySelectorAll('[data-ratio]').forEach(btn=>btn.addEventListener('click',()=>{ratio=btn.dataset.ratio;document.querySelectorAll('[data-ratio]').forEach(b=>b.classList.toggle('on',b===btn));draw()}));function captureSavedPreview(){
+  draw();
+  savedCanvas.width=canvas.width;
+  savedCanvas.height=canvas.height;
+  savedCtx.clearRect(0,0,savedCanvas.width,savedCanvas.height);
+  savedCtx.drawImage(canvas,0,0);
+  savedCanvas.style.display='block';
+  $('savedEmpty').style.display='none';
+  $('savedRatioLabel').textContent=`${ratio} · ${canvas.width}×${canvas.height}`;
+}
+$('compareBtn').addEventListener('click',captureSavedPreview);
+$('compareBtnTop').addEventListener('click',captureSavedPreview);
+function download(type){draw();const ext=type==='image/png'?'png':'jpg',quality=type==='image/jpeg'?0.94:undefined;let exportCanvas=canvas;if(type==='image/jpeg'){const jpgCanvas=document.createElement('canvas');jpgCanvas.width=canvas.width;jpgCanvas.height=canvas.height;const jpgCtx=jpgCanvas.getContext('2d');jpgCtx.fillStyle='#ffffff';jpgCtx.fillRect(0,0,jpgCanvas.width,jpgCanvas.height);jpgCtx.drawImage(canvas,0,0);exportCanvas=jpgCanvas}exportCanvas.toBlob(blob=>{if(!blob){saveMsg.className='msg bad';saveMsg.textContent='파일 생성에 실패했습니다.';return}const a=document.createElement('a'),url=URL.createObjectURL(blob);a.href=url;a.download=`jjal-card-${ratio.replace(':','x')}.${ext}`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);saveMsg.className='msg good';saveMsg.textContent=type==='image/png'?`${ratio} PNG 파일을 저장했습니다. 투명 영역은 그대로 유지됩니다.`:`${ratio} JPEG 파일을 저장했습니다. JPEG는 투명을 지원하지 않아 흰 배경으로 저장됩니다.`},type,quality)}downloadPng.addEventListener('click',()=>download('image/png'));downloadJpg.addEventListener('click',()=>download('image/jpeg'));
+const DB_NAME='jjalCardStudioDB',DB_VERSION=1,STORE='templates';
+const templateName=$('templateName'),templateList=$('templateList'),templateMsg=$('templateMsg');
+
+function tmsg(s,bad=false){templateMsg.className='msg '+(bad?'bad':'good');templateMsg.textContent=s}
+function openTemplateDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'id'})};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function dbAll(){
+  const db=await openTemplateDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readonly'),req=tx.objectStore(STORE).getAll();
+    req.onsuccess=()=>resolve(req.result||[]);
+    req.onerror=()=>reject(req.error);
+    tx.oncomplete=()=>db.close();
+  });
+}
+async function dbGet(id){
+  const db=await openTemplateDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readonly'),req=tx.objectStore(STORE).get(id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+    tx.oncomplete=()=>db.close();
+  });
+}
+async function dbPut(v){
+  const db=await openTemplateDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).put(v);
+    tx.oncomplete=()=>{db.close();resolve(true)};
+    tx.onerror=()=>{db.close();reject(tx.error)};
+    tx.onabort=()=>{db.close();reject(tx.error||new Error('저장 실패'))};
+  });
+}
+async function dbDelete(id){
+  const db=await openTemplateDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete=()=>{db.close();resolve(true)};
+    tx.onerror=()=>{db.close();reject(tx.error)};
+  });
+}
+function stateNow(){return{text:text.value,x:+x.value,y:+y.value,size:+size.value,color:color.value,align:align.value,ratio,fitMode:'stretch',imgX:0,imgY:0,zoom:100,imageDataUrl:imageDataUrl}}
+function setRatioValue(r){ratio=['1:1','4:5','9:16'].includes(r)?r:'1:1';document.querySelectorAll('[data-ratio]').forEach(b=>b.classList.toggle('on',b.dataset.ratio===ratio))}
+function applyState(s){
+  if(!s||typeof s!=='object')return;
+  text.value=typeof s.text==='string'?s.text:'';
+  x.value=Number.isFinite(+s.x)?s.x:50;y.value=Number.isFinite(+s.y)?s.y:50;size.value=Number.isFinite(+s.size)?s.size:54;
+  color.value=typeof s.color==='string'?s.color:'#ffffff';align.value=['left','center','right'].includes(s.align)?s.align:'center';
+  setRatioValue(s.ratio);
+  if(typeof s.imageDataUrl==='string'&&s.imageDataUrl.startsWith('data:image/')){
+    const restored=new Image();
+    restored.onload=()=>{image=restored;imageDataUrl=s.imageDataUrl;fileMsg.className='msg good';fileMsg.textContent='템플릿 사진까지 복원했습니다.';draw()};
+    restored.onerror=()=>{fileMsg.className='msg bad';fileMsg.textContent='템플릿 사진을 복원할 수 없습니다.';draw()};
+    restored.src=s.imageDataUrl;
+  }else{image=null;imageDataUrl=null;draw()}
+}
+
+async function dbReplaceAll(items){
+  const db=await openTemplateDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE);
+    store.clear();
+    items.forEach(v=>store.put(v));
+    tx.oncomplete=()=>{db.close();resolve(true)};
+    tx.onerror=()=>{db.close();reject(tx.error)};
+    tx.onabort=()=>{db.close();reject(tx.error||new Error('복원 실패'))};
+  });
+}
+function validTemplateState(s){
+  if(!s||typeof s!=='object'||Array.isArray(s))return false;
+  const required=['text','x','y','size','color','align','ratio','imgX','imgY','zoom','imageDataUrl'];
+  if(!required.every(k=>Object.prototype.hasOwnProperty.call(s,k)))return false;
+  if(typeof s.text!=='string')return false;
+  if(!Number.isFinite(+s.x)||!Number.isFinite(+s.y)||!Number.isFinite(+s.size))return false;
+  if(typeof s.color!=='string'||!['left','center','right'].includes(s.align))return false;
+  if(!['1:1','4:5','9:16'].includes(s.ratio))return false;
+  if(!Number.isFinite(+s.imgX)||!Number.isFinite(+s.imgY)||!Number.isFinite(+s.zoom))return false;
+  if(s.imageDataUrl!==null&&!(typeof s.imageDataUrl==='string'&&s.imageDataUrl.startsWith('data:image/')))return false;
+  return true;
+}
+function validateBackup(data){
+  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('JSON 최상위 형식이 올바르지 않습니다.');
+  if(data.format!=='jjal-card-studio-templates'||data.version!==1)throw new Error('지원하지 않는 백업 형식입니다.');
+  if(!Array.isArray(data.templates))throw new Error('templates 목록이 없습니다.');
+  const ids=new Set();
+  data.templates.forEach((t,i)=>{
+    if(!t||typeof t!=='object'||Array.isArray(t))throw new Error(`${i+1}번 템플릿 형식이 올바르지 않습니다.`);
+    if(typeof t.id!=='string'||!t.id.trim()||typeof t.name!=='string'||!t.name.trim()||!validTemplateState(t.state))
+      throw new Error('필수 항목이 없거나 값이 올바르지 않습니다.');
+    if(ids.has(t.id))throw new Error('중복된 템플릿 ID가 있습니다.');
+    ids.add(t.id);
+  });
+  return data.templates;
+}
+
+async function refreshTemplates(selected=''){
+  try{
+    const a=(await dbAll()).sort((a,b)=>(a.createdAt||'').localeCompare(b.createdAt||''));
+    templateList.innerHTML='';
+    if(!a.length){const o=document.createElement('option');o.value='';o.textContent='저장된 템플릿 없음';templateList.appendChild(o);return}
+    a.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name;templateList.appendChild(o)});
+    if(selected&&a.some(t=>t.id===selected))templateList.value=selected;
+  }catch(e){tmsg('템플릿 저장소를 열 수 없습니다.',true)}
+}
+$('templateCreate').addEventListener('click',async()=>{
+  const name=templateName.value.trim();if(!name){tmsg('템플릿 이름을 입력해 주세요.',true);return}
+  const id='tpl_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  try{await dbPut({id,name,state:stateNow(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});await refreshTemplates(id);templateName.value='';tmsg(`"${name}" 템플릿을 사진과 함께 저장했습니다.`)}
+  catch(e){tmsg('템플릿 저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.',true)}
+});
+$('templateLoad').addEventListener('click',async()=>{
+  if(!templateList.value){tmsg('불러올 템플릿을 선택해 주세요.',true);return}
+  try{const t=await dbGet(templateList.value);if(!t){tmsg('템플릿을 찾을 수 없습니다.',true);return}applyState(t.state);tmsg(`"${t.name}" 템플릿을 불러왔습니다.`)}
+  catch(e){tmsg('템플릿 불러오기에 실패했습니다.',true)}
+});
+$('templateUpdate').addEventListener('click',async()=>{
+  if(!templateList.value){tmsg('수정할 템플릿을 선택해 주세요.',true);return}
+  try{const t=await dbGet(templateList.value);if(!t){tmsg('수정할 템플릿을 찾을 수 없습니다.',true);return}t.state=stateNow();t.updatedAt=new Date().toISOString();await dbPut(t);await refreshTemplates(t.id);tmsg(`"${t.name}" 템플릿을 사진과 함께 수정했습니다.`)}
+  catch(e){tmsg('템플릿 수정에 실패했습니다.',true)}
+});
+$('templateDelete').addEventListener('click',async()=>{
+  if(!templateList.value){tmsg('삭제할 템플릿을 선택해 주세요.',true);return}
+  try{const t=await dbGet(templateList.value);if(!t){tmsg('삭제할 템플릿을 찾을 수 없습니다.',true);return}await dbDelete(t.id);await refreshTemplates();tmsg(`"${t.name}" 템플릿을 삭제했습니다.`)}
+  catch(e){tmsg('템플릿 삭제에 실패했습니다.',true)}
+});
+
+$('jsonExport').addEventListener('click',async()=>{
+  try{
+    const templates=await dbAll();
+    const payload={format:'jjal-card-studio-templates',version:1,exportedAt:new Date().toISOString(),templates};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='jjal-card-templates.json';document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    tmsg(`템플릿 ${templates.length}개를 JSON으로 내보냈습니다.`);
+  }catch(e){tmsg('JSON 내보내기에 실패했습니다.',true)}
+});
+$('jsonImportBtn').addEventListener('click',()=>{$('jsonImportFile').value='';$('jsonImportFile').click()});
+$('jsonImportFile').addEventListener('change',async(e)=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  let parsed,validated;
+  try{
+    parsed=JSON.parse(await f.text());
+    validated=validateBackup(parsed);
+  }catch(err){
+    const msg = err instanceof SyntaxError
+      ? 'JSON 파일 형식이 올바르지 않습니다.'
+      : err.message;
+    tmsg(`JSON 가져오기 거부: ${msg} 기존 템플릿은 유지됩니다.`,true);
+    return;
+  }
+  try{
+    await dbReplaceAll(validated);
+    await refreshTemplates();
+    tmsg(`정상 JSON을 확인했습니다. 템플릿 ${validated.length}개를 복원했습니다.`);
+  }catch(err){tmsg('JSON 복원 중 저장 오류가 발생했습니다. 기존 저장소를 확인해 주세요.',true)}
+});
+refreshTemplates();draw()})();</script></body></html>
